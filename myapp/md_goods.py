@@ -63,9 +63,6 @@ r = redis.Redis(host=host,port=port)
 
 #github提交测试
 
-
-
-
-
+#test2
 
 
