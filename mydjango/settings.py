@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'mydjango.wsgi.application'
 DATABASES = {
    'default': {
           'ENGINE': 'django.db.backends.mysql', #数据库引擎
-          'NAME': 'md',                       #数据库名
+          'NAME': 'meiduo',                       #数据库名
           'USER': 'root',                       #用户名
           'PASSWORD': '1993',                   #密码
           'HOST': 'localhost',                           #数据库主机，默认为localhost
