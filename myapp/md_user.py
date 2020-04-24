@@ -45,7 +45,7 @@ class Register(APIView):
             res['message'] = '该用户名可不用'
             return Response(res)
         else:
-            user = User(username=username,password=password,phone=phone)
+            user = User(username=username,password=make_password(password),phone=phone)
             user.save()
             res = {}
             res['code'] = 200
@@ -53,6 +53,21 @@ class Register(APIView):
             return Response(res)
 
 
+#登录
+class Login(APIView):
+
+    def get(self,request):
+
+        username = request.GET.get('username',None)
+        passowrd = request.GET.get('password',None)
+        
+        user = User.objects.filter(username=username,password=make_password(passowrd)).first()
+        if user:
+
+            return Response({'code':200,'message':'登录成功','uid':user.id,'username':user.username})
+
+        else:
+            return Response({'code':403,'message':'用户名或密码错误'})
 
 
         
