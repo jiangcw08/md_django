@@ -4,13 +4,15 @@ from django.db.models import Q,F
 
 from django.views import View
 from PIL import Image,ImageFont,ImageDraw
-
+from django.shortcuts import redirect
 from dwebsocket.decorators import accept_websocket
 import uuid
 import hashlib
 import re
 import random
 import io
+import requests
+import json
 
 from django.http import HttpResponse
 
@@ -18,6 +20,58 @@ from django.http import HttpResponse
 from myapp.models import User
 
 from rest_framework.views import APIView,Response
+
+
+#新浪微博回调
+def wb_black(request):
+
+    code = request.GET.get('code',None)
+
+    #定义token接口地址
+    url = "https://api.weibo.com/oauth2/access_token"
+
+    #定义参数
+    re = requests.post(url,data={
+
+        "client_id":"518243583",
+        "client_secret":"77b59cb73127e7e73f1f6d81972a6647",
+        "grant_type":"authorization_code",
+        "code":code,
+        "redirect_uri":"http://127.0.0.1:8000/sina_weibo"
+
+
+    })
+    # print(re.json())
+
+    #换取新浪微博用户昵称
+    res = requests.get('https://api.weibo.com/2/users/show.json',params={'access_token':re.json()['access_token'],'uid':re.json()['uid']})
+
+    res = json.loads(res.text)
+    print(res)
+
+    sina_name = ''
+    user_id = ''
+
+    #判断是否用新浪登录过
+    user = User.objects.filter(username=res['name']).first()
+    if user:
+        sina_name = user.username
+        user_id = user.id
+    else:
+        #没登录过，自动创建账号
+        user = User(username=str(res['name']),password='',)
+        user.save()
+        sina_name = res['name']
+
+        #查询用户id
+
+        user = User.objects.filter(username=str(res['name'])).first()
+
+        user_id = user.id
+
+    #跳转到vue首页 
+    return redirect('http://localhost:8080?sina_name='+str(sina_name)+'&uid='+str(user_id))
+
 
 #MD5加密方法
 def make_password(mypass):

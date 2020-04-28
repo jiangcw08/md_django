@@ -37,15 +37,16 @@ myimg = browser.find_element_by_xpath('//*[@id="app"]/div/section[2]/div/table/t
 #截取元素图
 myimg.screenshot('code.png')
 
-
-
 #截取屏幕
 # browser.get_screenshot_as_file('register.png')
 
-# 图像处理
+#图像处理
 import cv2
+
 #读图
 img = cv2.imread('./code.png',cv2.IMREAD_GRAYSCALE)
+
+
 #写图
 cv2.imwrite('./code1.png',img)
 
