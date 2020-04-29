@@ -14,12 +14,33 @@ import io
 import requests
 import json
 
+import os
+
+from mydjango.settings import UPLOAD_ROOT
+
 from django.http import HttpResponse
 
 
 from myapp.models import User
 
 from rest_framework.views import APIView,Response
+
+#文件上传通用类
+class UploadFile(APIView):
+
+    def post(self,request):
+
+        #接收参数
+        myfile = request.FILES.get('file')
+
+        #建立文件流对象
+        f = open(os.path.join(UPLOAD_ROOT,'',myfile.name.replace('"','')),'wb')
+        #写入
+        for chunk in myfile.chunks():
+            f.write(chunk)
+        f.close()
+
+        return Response({'filename':myfile.name})
 
 
 #新浪微博回调
@@ -30,7 +51,7 @@ def wb_black(request):
     #定义token接口地址
     url = "https://api.weibo.com/oauth2/access_token"
 
-    #定义参数
+    #获取token
     re = requests.post(url,data={
 
         "client_id":"518243583",
@@ -43,7 +64,7 @@ def wb_black(request):
     })
     # print(re.json())
 
-    #换取新浪微博用户昵称
+    #token换取新浪微博用户信息
     res = requests.get('https://api.weibo.com/2/users/show.json',params={'access_token':re.json()['access_token'],'uid':re.json()['uid']})
 
     res = json.loads(res.text)
