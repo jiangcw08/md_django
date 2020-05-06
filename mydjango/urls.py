@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path,re_path
 from django.views.static import serve
 from myapp.views import myindex
-from myapp.md_user import Register,Login,MyCode,wb_black,UploadFile
+from myapp.md_user import Register,Login,MyCode,wb_black,UploadFile,QiNiu,UserImg,UserInfo,UpYun
 
 urlpatterns = [
     #定义超链接路由
@@ -27,5 +27,9 @@ urlpatterns = [
     path('login/',Login.as_view()),
     path('code/',MyCode.as_view()),
     path('sina_weibo',wb_black),
-    path('file/',UploadFile.as_view())
+    path('file/',UploadFile.as_view()),
+    path('qn/',QiNiu.as_view()),
+    path('userimg/',UserImg.as_view()),
+    path('userinfo/',UserInfo.as_view()),
+    path('upyun/',UpYun.as_view()),
 ]

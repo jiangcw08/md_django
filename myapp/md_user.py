@@ -14,6 +14,7 @@ import io
 import requests
 import json
 
+
 import os
 
 from mydjango.settings import UPLOAD_ROOT
@@ -25,6 +26,61 @@ from myapp.models import User
 
 from rest_framework.views import APIView,Response
 
+#又拍云存储
+import upyun
+class UpYun(APIView):
+
+    def post(self,request):
+
+        #获取文件
+        file = request.FILES.get('file')
+        #新建又拍云实例
+        up = upyun.UpYun('jiangcw-upyun','jiangcw','Tb5WxPjiIpklrG6heUZSwb15SnIQ5ETv')
+        #声明头部信息
+        headers = {'x-gmkerl-rotate':'auto'}
+        #上传图片
+        for chunk in file.chunks():
+            res = up.put(file.name,chunk,checksum=True,headers=headers)
+        return Response({'filename':file.name})
+
+
+#获取用户信息
+class UserInfo(APIView):
+
+    def get(self,request):
+
+        id = request.GET.get('id')
+        user = User.objects.get(id=id)
+
+        img = user.img
+
+        return Response({'img':img})
+
+
+#跟新头像
+class UserImg(APIView):
+
+
+    def put(self, request):
+        id = request.data.pop('id')
+        flag = User.objects.filter(id=id).update(**request.data)
+
+        return Response({'message':'更新成功'})
+
+#七牛云token
+from qiniu import Auth
+
+class QiNiu(APIView):
+    def get(self,request):
+
+        #声明认证
+        q = Auth('avwXUyLRJ4ldXi4-b-160_Lf5Uaq_t5MGkBTVJAj','e-P6avQmYx5OXKVkkunYj_-5_nmkVaYmXQoYlhL3')
+
+        #获取token
+        token = q.upload_token('meidshop')
+
+        return Response({'token':token})
+
 #文件上传通用类
 class UploadFile(APIView):
 
@@ -32,6 +88,7 @@ class UploadFile(APIView):
 
         #接收参数
         myfile = request.FILES.get('file')
+        uid = request.POST.get('uid')
 
         #建立文件流对象
         f = open(os.path.join(UPLOAD_ROOT,'',myfile.name.replace('"','')),'wb')
@@ -40,7 +97,13 @@ class UploadFile(APIView):
             f.write(chunk)
         f.close()
 
-        return Response({'filename':myfile.name})
+        #修改头像地址
+        user = User.objects.get(id=uid)
+
+        user.img = myfile.name.replace('"','')
+        user.save()
+
+        return Response({'filename':myfile.name.replace('"','')})
 
 
 #新浪微博回调
