@@ -2,6 +2,7 @@ from mydjango.settings import BASE_DIR
 
 from django.db.models import Q,F
 
+from django.utils.deprecation import MiddlewareMixin
 from django.views import View
 from PIL import Image,ImageFont,ImageDraw
 from django.shortcuts import redirect
@@ -13,7 +14,8 @@ import random
 import io
 import requests
 import json
-
+import jwt
+import datetime
 
 import os
 
@@ -25,6 +27,26 @@ from django.http import HttpResponse
 from myapp.models import User
 
 from rest_framework.views import APIView,Response
+
+#自定义中间件
+class MyMiddleware(MiddlewareMixin):
+
+    def process_request(self,request):
+        print('过滤中间件')
+
+        #获取路由
+        if request.path_info.startswith("/userinfo"):
+
+            return HttpResponse(json.dumps({'message':'您篡改了uid'},ensure_ascii=False,indent=4)
+            ,content_type='application/json')
+            pass
+    def process_view(self,request,view_func,view_args,view_kwargs):
+        pass
+    def process_exception(self,request,exception):
+        pass
+    def process_response(self,request,response):
+        return response
+
 
 #又拍云存储
 import upyun
@@ -43,13 +65,39 @@ class UpYun(APIView):
             res = up.put(file.name,chunk,checksum=True,headers=headers)
         return Response({'filename':file.name})
 
+#权限检测装饰器
+from django.utils.decorators import method_decorator
+
+def my_decorator(func):
+    def wrapper(request,*args,**kwargs):
+
+        #接收参数
+        id = request.GET.get('id')
+        myjwt = request.GET.get('jwt')
+        # decode_jwt = jwt.decode(myjwt,'qwe123',algorithms=['HS256'])
+
+
+        try:
+            decode_jwt = jwt.decode(myjwt,'qwe123',algorithms=['HS256'])
+        except Exception as e:
+            return Response({'code':400,'message':'身份验证已过期，请重新登录'})
+            
+
+        
+        if int(id) != int(decode_jwt['data']['uid']):
+            return Response({'code':401,'message':'没有权限'})
+        return func(request,*args,**kwargs)
+    return wrapper
+
 
 #获取用户信息
 class UserInfo(APIView):
-
+    @method_decorator(my_decorator)
     def get(self,request):
 
         id = request.GET.get('id')
+    
+
         user = User.objects.get(id=id)
 
         img = user.img
@@ -225,11 +273,21 @@ class Login(APIView):
         # r.lpop(username)
         print(r.llen(username))
         if r.llen(username) < 3:
-            user = User.objects.filter(username=username,password=make_password(passowrd)).first()
+            user = User.objects.filter(Q(username=username) | Q(phone=username),password=make_password(passowrd)).first()
             
             if user:
 
-                return Response({'code':200,'message':'登录成功','uid':user.id,'username':user.username})
+                yanzheng = {
+                'exp' : int((datetime.datetime.now() + datetime.timedelta(seconds=30)).timestamp()),
+                'data':{'uid':user.id}
+    
+            }
+
+                #生成用户token
+                encode_jwt = jwt.encode(yanzheng,'qwe123',algorithm="HS256")
+                encode_str = str(encode_jwt,'utf-8')
+
+                return Response({'code':200,'message':'登录成功','uid':user.id,'username':user.username,'jwt':encode_str})
 
             else:
 

@@ -31,8 +31,8 @@ up = upyun.UpYun('jiangcw-upyun','jiangcw','Tb5WxPjiIpklrG6heUZSwb15SnIQ5ETv')
 
 
 # #下载
-# res = up.get('/meiduo/test2.txt')
-# print(res)
+res = up.get('/meiduo/test3.txt')
+print(res)
 
 #删除文件
-up.delete('/meiduo/test2.txt')
+# up.delete('/meiduo/test2.txt')
