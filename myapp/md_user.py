@@ -31,15 +31,15 @@ from rest_framework.views import APIView,Response
 #自定义中间件
 class MyMiddleware(MiddlewareMixin):
 
-    def process_request(self,request):
-        print('过滤中间件')
+    # def process_request(self,request):
+    #     print('过滤中间件')
 
-        #获取路由
-        if request.path_info.startswith("/userinfo"):
+    #     #获取路由
+    #     if request.path_info.startswith("/userinfo"):
 
-            return HttpResponse(json.dumps({'message':'您篡改了uid'},ensure_ascii=False,indent=4)
-            ,content_type='application/json')
-            pass
+    #         return HttpResponse(json.dumps({'message':'您篡改了uid'},ensure_ascii=False,indent=4)
+    #         ,content_type='application/json')
+    #         pass
     def process_view(self,request,view_func,view_args,view_kwargs):
         pass
     def process_exception(self,request,exception):
