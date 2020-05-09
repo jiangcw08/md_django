@@ -1,5 +1,4 @@
 from django.db import models
-
 #导入时间域
 from django.utils import timezone
 
@@ -32,3 +31,16 @@ class User(Base):
 	#声明表名
 	class Meta:
 		db_table = "user"
+
+
+
+# 轮播图
+
+class Carousel(Base):
+
+	name = models.CharField(max_length=200)
+	src = models.CharField(max_length=200)
+	img = models.CharField(max_length=200)
+
+	class Meta:
+		db_table = 'carousel'

@@ -23,10 +23,31 @@ from mydjango.settings import UPLOAD_ROOT
 
 from django.http import HttpResponse
 
+from .myser import CarouselSer
 
-from myapp.models import User
+from myapp.models import User,Carousel
 
 from rest_framework.views import APIView,Response
+
+
+
+
+
+#轮播图
+class GetCarousel(APIView):
+
+    def get(self,request):
+
+        #读库
+        carousels = Carousel.objects.all()
+
+        #序列化操作
+        carousels_ser = CarouselSer(carousels,many=True)
+
+        return Response(carousels_ser.data)
+
+
+
 
 #自定义中间件
 class MyMiddleware(MiddlewareMixin):

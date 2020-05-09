@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path,re_path
 from django.views.static import serve
 from myapp.views import myindex
-from myapp.md_user import Register,Login,MyCode,wb_black,UploadFile,QiNiu,UserImg,UserInfo,UpYun
+from myapp.md_user import Register,Login,MyCode,wb_black,UploadFile,QiNiu,UserImg,UserInfo,UpYun,GetCarousel
 
 urlpatterns = [
     #定义超链接路由
@@ -32,4 +32,5 @@ urlpatterns = [
     path('userimg/',UserImg.as_view()),
     path('userinfo/',UserInfo.as_view()),
     path('upyun/',UpYun.as_view()),
+    path('getcaroule/',GetCarousel.as_view()),
 ]
