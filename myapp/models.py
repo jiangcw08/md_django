@@ -44,3 +44,23 @@ class Carousel(Base):
 
 	class Meta:
 		db_table = 'carousel'
+
+
+#商品表
+class Goods(Base):
+	name = models.CharField(max_length=200)
+	desc = models.CharField(max_length=200,null=True)
+	price = models.IntegerField(null=True)
+	video = models.CharField(max_length=200,null=True)
+	img = models.CharField(max_length=200,null=True)
+	params = models.CharField(max_length=200,null=True)
+	flows = models.IntegerField(default=0,null=True)
+	cid = models.IntegerField(null=True)
+	class Meta:
+		db_table = "goods"
+
+#分类表
+class Category(Base):
+	name = models.CharField(max_length=200)
+	class Meta:
+		db_table = "category"
