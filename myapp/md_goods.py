@@ -30,6 +30,46 @@ from myapp.models import User,Carousel,Goods,Category
 from rest_framework.views import APIView,Response
 
 
+#商品详情
+class GoodInfo(APIView):
+    def get(self,request):
+
+        id = request.GET.get('id')
+
+        good = Goods.objects.get(id=id)
+
+        good_ser = GoodsSer(good)
+
+        return Response(good_ser.data)
+
+#商品列表
+class Goodslist(APIView):
+    def get(self,request):
+
+
+        #获取当前页
+        page = request.GET.get('page',1)
+        #一页显示个数
+        size = request.GET.get('size',2)
+        #计算从哪切
+        data_start = (int(page)-1) * int(size)
+        #计算切到哪
+        data_end = int(page) * int(size)
+
+        #查询 切片操作
+        goods = Goods.objects.all()[data_start:data_end]
+
+        #查询所有商品个数
+        count = Goods.objects.count()
+
+        goods_ser = GoodsSer(goods,many=True)
+
+        res = {}
+        res['total'] = count
+        res['data'] = goods_ser.data
+
+        return Response(res)
+
 
 #商品入库
 class InsertGoods(APIView):
