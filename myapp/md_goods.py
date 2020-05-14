@@ -47,6 +47,16 @@ class Goodslist(APIView):
     def get(self,request):
 
 
+        basis = request.GET.get('basis','')
+        kind = request.GET.get('kind','')
+
+        #检索字段
+        text = request.GET.get('text',None)
+
+        
+
+
+
         #获取当前页
         page = request.GET.get('page',1)
         #一页显示个数
@@ -56,11 +66,32 @@ class Goodslist(APIView):
         #计算切到哪
         data_end = int(page) * int(size)
 
+        
+        if basis:
+            if kind:
+                goods = Goods.objects.all().order_by(kind+basis)[data_start:data_end]
+            else:
+                goods = Goods.objects.all().order_by(basis)[data_start:data_end]
         #查询 切片操作
-        goods = Goods.objects.all()[data_start:data_end]
+        else:
+            goods = Goods.objects.all()[data_start:data_end]
+
+        #是否进行模糊查询
+        if text:
+
+            text = json.loads(text)
+
+            for item in text:
+
+                print(item)
+                goods = Goods.objects.filter(Q(name__contains=item) | Q(desc__contains=item))[data_start:data_end]
+
+                count = Goods.objects.filter(Q(name__contains=item) | Q(desc__contains=item)).count()
+
+        else:
 
         #查询所有商品个数
-        count = Goods.objects.count()
+            count = Goods.objects.count()
 
         goods_ser = GoodsSer(goods,many=True)
 
