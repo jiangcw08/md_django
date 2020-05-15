@@ -1,41 +1,48 @@
 from rest_framework.views import Response,APIView
+from myapp.models import Goods
+from django.db.models import Q
+from myapp.myser import GoodsSer
 
-#又拍云存储
-import upyun
-class UploadUpy(APIView):
 
-    def post(self,request):
 
-        #获取文件
-        file = request.FILES.get('file')
-        #新建又拍云实例
-        up = upyun.UpYun('jiangcw-upyun','jiangcw','Tb5WxPjiIpklrG6heUZSwb15SnIQ5ETv')
-        #声明头部信息
-        headers = {'x-gmkerl-rotate':'auto'}
-        #上传图片
-        for chunk in file.chunks():
-            res = up.put(file.name,chunk,checksum=True,headers=headers)
-        return Response({'filename':file.name})
 
-class Mkdir(APIView):
-
+#商品列表
+class Get_goods(APIView):
     def get(self,request):
 
-        name = request.GET.get('name')
+        #检索字段
+        text = request.GET.get('text',None)
 
+        #获取当前页
+        page = request.GET.get('page',1)
+        #一页显示个数
+        size = request.GET.get('size',2)
+        #计算从哪切
+        data_start = (int(page)-1) * int(size)
+        #计算切到哪
+        data_end = int(page) * int(size)
 
-        up = upyun.UpYun('jiangcw-upyun','jiangcw','Tb5WxPjiIpklrG6heUZSwb15SnIQ5ETv')
-        up.mkdir(name)
+        
 
-        return Response({'code':200,'message':'创建成功'})
+        #查询 切片操作
+        goods = Goods.objects.all()[data_start:data_end]
 
-class Del(APIView):
+        #是否进行模糊查询
+        if text:
 
-    def get(self,request):
+            goods = Goods.objects.filter(Q(name__contains=text) | Q(desc__contains=text))[data_start:data_end]
 
+            count = Goods.objects.filter(Q(name__contains=text) | Q(desc__contains=text)).count()
 
-        name = request.GET.get('name')
+        else:
 
-        up = upyun.UpYun('jiangcw-upyun','jiangcw','Tb5WxPjiIpklrG6heUZSwb15SnIQ5ETv')
-        up.delete(name)
-        return Response({'code':200,'message':'ok'})
+        #查询所有商品个数
+            count = Goods.objects.count()
+
+        goods_ser = GoodsSer(goods,many=True)
+
+        res = {}
+        res['total'] = count
+        res['data'] = goods_ser.data
+
+        return Response(res)

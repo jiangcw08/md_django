@@ -30,6 +30,44 @@ from myapp.models import User,Carousel,Goods,Category
 from rest_framework.views import APIView,Response
 
 
+
+# 格式化结果集
+def dictfetch(cursor):
+
+    # 声明描述符
+    desc = cursor.desc
+
+    return [ dict(zip( [col[0] for col in desc],row)) 
+            for row in cursor.fetchall()
+    ]
+
+
+#导入原生sql模块
+from django.db import connection
+# 搜索接口
+class Sarch(APIView):
+    def get(self,request):
+
+        # 检索字段
+        text = request.GET.get('text',None)
+        
+        # # 转换数据类型
+        text = json.loads(text)
+
+        # 建立游标对象
+        cursor = connection.cursor()
+
+        # 执行sql语句
+        cursor.execute("select id,name,price,img from goods where name like '%%衣%%' ")
+ 
+        # 查询
+        result = cursor.fetchall()
+        # result = dictfetch(cursor)
+        print(result)
+
+        return Response({'message':text})
+
+
 #商品详情
 class GoodInfo(APIView):
     def get(self,request):
@@ -50,13 +88,6 @@ class Goodslist(APIView):
         basis = request.GET.get('basis','')
         kind = request.GET.get('kind','')
 
-        #检索字段
-        text = request.GET.get('text',None)
-
-        
-
-
-
         #获取当前页
         page = request.GET.get('page',1)
         #一页显示个数
@@ -75,20 +106,6 @@ class Goodslist(APIView):
         #查询 切片操作
         else:
             goods = Goods.objects.all()[data_start:data_end]
-
-        #是否进行模糊查询
-        if text:
-
-            text = json.loads(text)
-
-            for item in text:
-
-                print(item)
-                goods = Goods.objects.filter(Q(name__contains=item) | Q(desc__contains=item))[data_start:data_end]
-
-                count = Goods.objects.filter(Q(name__contains=item) | Q(desc__contains=item)).count()
-
-        else:
 
         #查询所有商品个数
             count = Goods.objects.count()
