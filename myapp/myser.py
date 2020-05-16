@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from myapp.models import Carousel,Goods,Category
+from myapp.models import Carousel,Goods,Category,Comment
 
 #建立序列化类
 class CarouselSer(serializers.ModelSerializer):
@@ -20,4 +20,10 @@ class CateSer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
+        fields = "__all__"    
+
+class CommentSer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
         fields = "__all__"    

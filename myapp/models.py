@@ -64,3 +64,12 @@ class Category(Base):
 	name = models.CharField(max_length=200)
 	class Meta:
 		db_table = "category"
+
+
+#评论表
+class Comment(Base):
+	uid = models.IntegerField()
+	gid = models.IntegerField()
+	content = models.CharField(max_length=200)
+	class Meta:
+		db_table = "comment"

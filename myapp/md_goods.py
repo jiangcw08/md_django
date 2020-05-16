@@ -23,19 +23,32 @@ from mydjango.settings import UPLOAD_ROOT
 
 from django.http import HttpResponse
 
-from .myser import CarouselSer,GoodsSer,CateSer
+from .myser import CarouselSer,GoodsSer,CateSer,CommentSer
 
-from myapp.models import User,Carousel,Goods,Category
+from myapp.models import User,Carousel,Goods,Category,Comment
 
 from rest_framework.views import APIView,Response
 
+
+
+#评论
+class CommentInsert(APIView):
+
+    def post(self,request):
+    
+        ser = CommentSer(data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response({'code':200,'message':'添加成功'})
+        return Response({'code':400,'message':ser.errors})
+                    
 
 
 # 格式化结果集
 def dictfetch(cursor):
 
     # 声明描述符
-    desc = cursor.desc
+    desc = cursor.description
 
     return [ dict(zip( [col[0] for col in desc],row)) 
             for row in cursor.fetchall()
@@ -54,18 +67,30 @@ class Sarch(APIView):
         # # 转换数据类型
         text = json.loads(text)
 
+        #动态拼接
+        sql = ''
+        for val in text:
+
+            sql += "or name like '%%%s%%'" % val
+        sql = sql.strip('or')
+
+        sql_cursor = "select id,name,price,img from goods where id != 0 and (" + sql + ")"
+
+        print(sql_cursor)
+        print('=========================')
+
         # 建立游标对象
         cursor = connection.cursor()
 
         # 执行sql语句
-        cursor.execute("select id,name,price,img from goods where name like '%%衣%%' ")
+        cursor.execute(sql_cursor)
  
         # 查询
-        result = cursor.fetchall()
-        # result = dictfetch(cursor)
+        # result  = cursor.fetchall()
+        result = dictfetch(cursor)
         print(result)
 
-        return Response({'message':text})
+        return Response({'data':result})
 
 
 #商品详情
