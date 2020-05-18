@@ -23,7 +23,7 @@ from mydjango.settings import UPLOAD_ROOT
 
 from django.http import HttpResponse
 
-from .myser import CarouselSer
+from .myser import CarouselSer,UserSer
 
 from myapp.models import User,Carousel
 
@@ -31,6 +31,20 @@ from rest_framework.views import APIView,Response
 
 
 
+
+
+#获取用户
+class Userlist(APIView):
+
+    def get(self,request):
+
+        users = User.objects.all()
+
+        user_ser = UserSer(users,many=True)
+
+        return Response(user_ser.data)
+
+        
 
 
 #轮播图

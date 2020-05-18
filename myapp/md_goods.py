@@ -31,18 +31,49 @@ from rest_framework.views import APIView,Response
 
 
 
+
+
+#获取商品评论
+class CommentList(APIView):
+
+    def get(self,request):
+
+        gid = request.GET.get('gid')
+
+        comment = Comment.objects.filter(gid=gid).order_by("-id")
+
+        comment_ser = CommentSer(comment,many=True)
+
+        return Response(comment_ser.data)
+
+
 #评论
+import redis
+#定义地址和端口
+host = '127.0.0.1'
+port = 6379
+#建立redis连接
+r = redis.Redis(host=host,port=port)
+
 class CommentInsert(APIView):
 
     def post(self,request):
-    
-        ser = CommentSer(data=request.data)
-        if ser.is_valid():
-            ser.save()
-            return Response({'code':200,'message':'添加成功'})
-        return Response({'code':400,'message':ser.errors})
-                    
 
+        id = request.POST.get('uid')
+        uid = str(id)
+        
+        if r.llen(uid) > 2:
+            return Response({'code':403,'message':'xieyixie'})
+
+        comment = CommentSer(data=request.data)
+
+        if comment.is_valid():
+            comment.save()
+
+            r.lpush(uid,1)
+            r.expire(uid,5)
+
+        return Response({'code':200,'message':'ok'})
 
 # 格式化结果集
 def dictfetch(cursor):
