@@ -31,6 +31,44 @@ from rest_framework.views import APIView,Response
 
 
 
+#商品评论回复
+class Reply(APIView):
+
+    def get(self, request):
+
+        #接收参数
+        content = request.GET.get('content')
+        id = request.GET.get('id')
+        username = request.GET.get('username')
+
+
+        #查询被回复的评论
+        comment = Comment.objects.get(id=id)
+
+        my_list = []
+        #查看是否存在评论回复
+        if comment.reply:
+            my_list = eval(comment.reply)
+            my_list.insert(0,{'username':username,'content':content})
+        else:
+            my_list.insert(0,{'username':username,'content':content})
+        
+
+        comment.reply = json.dumps(my_list,ensure_ascii=False)
+        # print(json.dumps(my_list,ensure_ascii=False))
+        comment.save()
+
+        return Response({'code':200})
+
+        
+
+            
+
+        
+
+
+
+
 
 
 #获取商品评论
@@ -57,6 +95,7 @@ r = redis.Redis(host=host,port=port)
 
 class CommentInsert(APIView):
 
+
     def post(self,request):
 
         id = request.POST.get('uid')
@@ -65,15 +104,19 @@ class CommentInsert(APIView):
         if r.llen(uid) > 2:
             return Response({'code':403,'message':'xieyixie'})
 
+        print(request.data)
+
         comment = CommentSer(data=request.data)
 
         if comment.is_valid():
+            
             comment.save()
 
             r.lpush(uid,1)
             r.expire(uid,5)
 
         return Response({'code':200,'message':'ok'})
+
 
 # 格式化结果集
 def dictfetch(cursor):

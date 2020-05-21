@@ -19,7 +19,7 @@ from django.views.static import serve
 from myapp.views import myindex
 from myapp.md_user import Register,Login,MyCode,wb_black,UploadFile,QiNiu,UserImg,UserInfo,UpYun,GetCarousel,Userlist
 from myapp.kaoshi import Get_goods
-from myapp.md_goods import InsertGoods,CateList,Goodslist,GoodInfo,Sarch,CommentInsert,CommentList
+from myapp.md_goods import InsertGoods,CateList,Goodslist,GoodInfo,Sarch,CommentInsert,CommentList,Reply
 urlpatterns = [
     #定义超链接路由
     re_path('^static/upload/(?P<path>.*)$',serve,{'document_root':'/static/upload/'}),
@@ -42,7 +42,8 @@ urlpatterns = [
     path('kaoshi/',Get_goods.as_view()),
     path('addcomment/',CommentInsert.as_view()),
     path('commentlist/',CommentList.as_view()),
-    path('userlist/',Userlist.as_view())
+    path('userlist/',Userlist.as_view()),
+    path('reply/',Reply.as_view())
 
     
 ]

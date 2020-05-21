@@ -71,5 +71,6 @@ class Comment(Base):
 	uid = models.IntegerField()
 	gid = models.IntegerField()
 	content = models.CharField(max_length=200)
+	reply = models.CharField(max_length=200,null=True)
 	class Meta:
 		db_table = "comment"

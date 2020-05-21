@@ -21,7 +21,7 @@ import os
 
 from mydjango.settings import UPLOAD_ROOT
 
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 
 from .myser import CarouselSer,UserSer
 
@@ -29,22 +29,20 @@ from myapp.models import User,Carousel
 
 from rest_framework.views import APIView,Response
 
-
+from rest_framework import serializers
 
 
 
 #获取用户
-class Userlist(APIView):
+class Userlist(View):
 
     def get(self,request):
 
-        users = User.objects.all()
+        users = User.objects.filter().values('id','username')
 
-        user_ser = UserSer(users,many=True)
+        users = list(users)
 
-        return Response(user_ser.data)
-
-        
+        return JsonResponse(users,safe=False,json_dumps_params={'ensure_ascii':False})
 
 
 #轮播图
